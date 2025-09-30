@@ -100,24 +100,51 @@ export default function App() {
           loop={true}
         >
           {galleryImages.map((file, index) => (
-            <SwiperSlide key={index}>
-              {file.endsWith(".mp4") ? (
-                <video
-                  src={`/${file}`}
-                  controls
-                  muted
-                  loop
-                  className="w-full h-80 object-cover rounded-xl shadow-2xl border-4 border-pink-300"
-                />
-              ) : (
-                <img
-                  src={`/${file}`}
-                  alt={`Decoration ${index + 1}`}
-                  onClick={() => setFullscreenImg(file)}
-                  className="w-full h-80 object-cover rounded-xl shadow-2xl border-4 border-pink-300 cursor-pointer"
-                />
-              )}
-            </SwiperSlide>
+  <SwiperSlide key={index}>
+    {file.endsWith(".mp4") ? (
+      <video
+        src={`/${file}`}
+        controls
+        muted
+        loop
+        className="w-full h-64 sm:h-72 md:h-80 lg:h-96 object-cover rounded-xl shadow-2xl border-4 border-pink-300"
+      />
+    ) : (
+      <img
+        src={`/${file}`}
+        alt={`Decoration ${index + 1}`}
+        onClick={() => setFullscreenImg(file)}
+        className="w-full h-64 sm:h-72 md:h-80 lg:h-96 object-cover rounded-xl shadow-2xl border-4 border-pink-300 cursor-pointer"
+      />
+    )}
+    {fullscreenImg && (
+  <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+    <button
+      onClick={() => setFullscreenImg(null)}
+      className="absolute top-6 right-6 text-white text-3xl font-bold hover:text-pink-400"
+    >
+      ✕
+    </button>
+    {fullscreenImg.endsWith(".mp4") ? (
+      <video
+        src={`/${fullscreenImg}`}
+        controls
+        autoPlay
+        muted
+        loop
+        className="max-h-[90vh] max-w-[95vw] object-contain rounded-xl shadow-2xl"
+      />
+    ) : (
+      <img
+        src={`/${fullscreenImg}`}
+        alt="Fullscreen view"
+        className="max-h-[90vh] max-w-[95vw] object-contain rounded-xl shadow-2xl"
+      />
+    )}
+  </div>
+)}
+
+  </SwiperSlide>
 ))}
         </Swiper>
       </Section>
