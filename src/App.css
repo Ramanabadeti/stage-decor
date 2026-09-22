@@ -2,28 +2,68 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
 
-/* Highlight active slide */
-.swiper-slide {
-  opacity: 0.6;
-  transform: scale(0.85);
-  transition: all 0.3s ease;
+  body {
+    @apply bg-ivory text-ink font-body antialiased;
+    /* Elegant light ground: warm ivory with the faintest blush and gold bloom */
+    background-image:
+      radial-gradient(60rem 40rem at 12% -10%, rgba(235, 217, 210, 0.45), transparent 60%),
+      radial-gradient(50rem 36rem at 92% 8%, rgba(212, 184, 122, 0.22), transparent 62%),
+      radial-gradient(70rem 50rem at 50% 108%, rgba(239, 230, 216, 0.75), transparent 65%);
+    background-attachment: fixed;
+  }
+
+  /* Anchor links land below the fixed header instead of underneath it */
+  section[id] {
+    scroll-margin-top: 5.5rem;
+  }
 }
 
-.swiper-slide-active {
-  opacity: 1;
-  transform: scale(1.1);
+@layer components {
+  /* Small gold eyebrow label above each section title */
+  .eyebrow {
+    @apply font-body text-[0.68rem] uppercase tracking-luxe text-gold;
+  }
+
+  /* Thin gold rule with a diamond at its centre */
+  .rule {
+    @apply relative h-px w-24 bg-gold/40;
+  }
+  .rule::after {
+    content: "";
+    @apply absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-gold;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center bg-gold px-8 py-3 font-body text-xs uppercase tracking-luxe text-ivory
+           transition-colors duration-300 hover:bg-ink;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center border border-ink/25 bg-white/70 px-8 py-3 font-body text-xs
+           uppercase tracking-luxe text-ink backdrop-blur transition-colors duration-300 hover:border-gold hover:text-gold;
+  }
+
+  .field {
+    @apply w-full border-b border-ink/20 bg-transparent px-1 py-3 font-body text-[0.95rem] text-ink
+           placeholder:text-muted/70 focus:border-gold focus:outline-none transition-colors;
+  }
 }
 
-/* Style arrows */
-.swiper-button-next,
-.swiper-button-prev {
-  color: white;
-  font-size: 2rem;
-  font-weight: bold;
+/* Gallery lightbox fade */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade {
+  animation: fadeIn 0.35s ease both;
 }
 
-
-html {
-  scroll-behavior: smooth;
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .animate-fade { animation: none; }
 }
