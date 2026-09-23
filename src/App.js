@@ -1,8 +1,26 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import emailjs from "@emailjs/browser";
-import { galleryImages, heroImage, quotes, services, equipment } from "./content";
+import {
+  galleryImages,
+  galleryNote,
+  heroImage,
+  quotes,
+  services,
+  equipment,
+} from "./content";
 import "./App.css";
+
+/* Faint line-art motif layer sitting behind a section's content.
+   `variant` picks the pattern, `fade` keeps it off the middle of the page. */
+function Ornament({ variant = "quatrefoil", fade = "fade-edges" }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`ornament ornament--${variant} ornament--${fade}`}
+    />
+  );
+}
 
 const NAV = [
   ["Home", "home"],
@@ -75,10 +93,24 @@ function QuoteBand({ quote, image }) {
 
 export default function App() {
   const form = useRef();
+  const referenceRef = useRef();
   const [lightbox, setLightbox] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [status, setStatus] = useState(null);
+  // Design code the customer picked from the gallery, e.g. "W-02"
+  const [reference, setReference] = useState("");
+
+  /* "I like this design" — carry the code down to the enquiry form so the
+     email that goes out has both the design AND a way to reply. */
+  const pickDesign = (img) => {
+    setReference(img.code);
+    setStatus(null);
+    setLightbox(null);
+    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+    // Land the cursor in the form once the scroll settles
+    window.setTimeout(() => referenceRef.current?.focus({ preventScroll: true }), 700);
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -97,17 +129,43 @@ export default function App() {
   const sendEmail = (e) => {
     e.preventDefault();
     setStatus("sending");
+
+    const data = Object.fromEntries(new FormData(form.current).entries());
+    const chosen = data.reference_design?.trim() || "";
+
+    // A ready-made plain-text block. Even a bare EmailJS template that only
+    // prints {{summary}} will show every answer, the design code included.
+    const summary = [
+      ["Name", data.user_name],
+      ["Mobile", data.user_phone],
+      ["Email", data.user_email],
+      ["Event", data.event_type],
+      ["Date", data.event_date],
+      ["Time", data.event_time],
+      ["Venue", data.event_place],
+      ["Reference design", chosen],
+      ["Notes", data.message],
+    ]
+      .filter(([, v]) => v)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join("\n");
+
     emailjs
-      .sendForm(
+      .send(
         "service_tg8t50h",
         "template_z4ziarc",
-        form.current,
+        {
+          ...data,
+          reference_design: chosen || "Not specified",
+          summary,
+        },
         "bfzg_N3Jx3h92YwQV"
       )
       .then(
         () => {
           setStatus("sent");
           form.current.reset();
+          setReference("");
         },
         () => setStatus("error")
       );
@@ -264,8 +322,9 @@ export default function App() {
       </section>
 
       {/* ── ABOUT ──────────────────────────────────────────── */}
-      <section id="about" className="py-24 sm:py-32">
-        <div className="mx-auto grid max-w-6xl items-center gap-14 px-6 lg:grid-cols-2 lg:gap-20">
+      <section id="about" className="relative overflow-hidden py-24 sm:py-32">
+        <Ornament variant="quatrefoil" fade="fade-tl" />
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-14 px-6 lg:grid-cols-2 lg:gap-20">
           <motion.div
             {...fadeUp}
             className="relative order-2 lg:order-1"
@@ -339,8 +398,9 @@ export default function App() {
       <QuoteBand quote={quotes.wedding} image="dec5.jpeg" />
 
       {/* ── SERVICES ───────────────────────────────────────── */}
-      <section id="services" className="py-24 sm:py-32">
-        <div className="mx-auto max-w-6xl px-6">
+      <section id="services" className="relative overflow-hidden py-24 sm:py-32">
+        <Ornament variant="mandala" fade="fade-edges" />
+        <div className="relative z-10 mx-auto max-w-6xl px-6">
           <SectionHeading eyebrow="What We Do" title="Our Services" />
 
           <div className="grid gap-8 sm:grid-cols-2">
@@ -378,18 +438,18 @@ export default function App() {
       <QuoteBand quote={quotes.birthday} image="dec7.jpeg" />
 
       {/* ── GALLERY ────────────────────────────────────────── */}
-      <section id="gallery" className="py-24 sm:py-32">
-        <div className="mx-auto max-w-6xl px-6">
+      <section id="gallery" className="relative overflow-hidden py-24 sm:py-32">
+        <Ornament variant="quatrefoil" fade="fade-br" />
+        <div className="relative z-10 mx-auto max-w-6xl px-6">
           <SectionHeading eyebrow="Our Work" title="Gallery" />
 
           {/* Editorial grid — the first photograph runs full width */}
           <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3">
             {galleryImages.map((img, i) => (
-              <motion.button
+              <motion.div
                 {...fadeUp}
                 transition={{ ...fadeUp.transition, delay: (i % 3) * 0.08 }}
                 key={img.file}
-                onClick={() => setLightbox(img)}
                 className={`group relative overflow-hidden bg-linen shadow-card ${
                   i === 0 ? "col-span-2 lg:col-span-2 lg:row-span-2" : ""
                 }`}
@@ -402,16 +462,40 @@ export default function App() {
                     i === 0 ? "aspect-[4/3] lg:h-full" : "aspect-square"
                   }`}
                 />
-                {/* Caption veil */}
-                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/70 to-transparent p-4 text-left opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+
+                {/* Whole tile opens the lightbox */}
+                <button
+                  onClick={() => setLightbox(img)}
+                  aria-label={`View design ${img.code} — ${img.caption}`}
+                  className="absolute inset-0 z-10 cursor-pointer"
+                />
+
+                {/* Design code — always visible, so it can be quoted */}
+                <span className="pointer-events-none absolute left-3 top-3 z-20 bg-ivory/90 px-2.5 py-1 font-body text-[0.6rem] uppercase tracking-[0.18em] text-ink shadow-sm backdrop-blur-sm">
+                  {img.code}
+                </span>
+
+                {/* Caption + action. Always shown on touch, on hover for pointers. */}
+                <div
+                  className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-ink/85 via-ink/55 to-transparent p-4 text-left
+                             opacity-100 transition-opacity duration-500
+                             md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
+                >
                   <span className="block font-body text-[0.6rem] uppercase tracking-[0.2em] text-goldlight">
-                    {img.tag}
+                    {img.tag} · {img.code}
                   </span>
-                  <span className="mt-1 block font-display text-lg font-light text-ivory">
+                  <span className="mt-1 block font-display text-lg font-light leading-tight text-ivory">
                     {img.caption}
                   </span>
-                </span>
-              </motion.button>
+                  <button
+                    onClick={() => pickDesign(img)}
+                    className="mt-3 inline-flex items-center gap-1.5 bg-gold px-4 py-2 font-body text-[0.6rem] uppercase tracking-[0.16em]
+                               text-ivory transition-colors duration-300 hover:bg-ivory hover:text-ink"
+                  >
+                    I like this design
+                  </button>
+                </div>
+              </motion.div>
             ))}
 
             {/* Video tile */}
@@ -433,9 +517,9 @@ export default function App() {
 
           <motion.p
             {...fadeUp}
-            className="mt-12 text-center font-body text-sm font-light text-muted"
+            className="mx-auto mt-12 max-w-xl text-center font-body text-sm font-light leading-relaxed text-muted"
           >
-            Looking for something in your own colours?{" "}
+            {galleryNote}{" "}
             <a href="#contact" className="text-gold underline underline-offset-4">
               Tell us what you have in mind.
             </a>
@@ -447,8 +531,9 @@ export default function App() {
       <QuoteBand quote={quotes.engagement} image="dec2.jpg" />
 
       {/* ── EQUIPMENT ──────────────────────────────────────── */}
-      <section id="equipment" className="py-24 sm:py-32">
-        <div className="mx-auto max-w-6xl px-6">
+      <section id="equipment" className="relative overflow-hidden py-24 sm:py-32">
+        <Ornament variant="mandala" fade="fade-tl" />
+        <div className="relative z-10 mx-auto max-w-6xl px-6">
           <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-20">
             <motion.div {...fadeUp} className="overflow-hidden shadow-soft">
               <img
@@ -492,8 +577,9 @@ export default function App() {
       <QuoteBand quote={quotes.closing} image="dec1.jpg" />
 
       {/* ── CONTACT ────────────────────────────────────────── */}
-      <section id="contact" className="py-24 sm:py-32">
-        <div className="mx-auto max-w-3xl px-6">
+      <section id="contact" className="relative overflow-hidden py-24 sm:py-32">
+        <Ornament variant="quatrefoil" fade="fade-edges" />
+        <div className="relative z-10 mx-auto max-w-3xl px-6">
           <SectionHeading
             eyebrow="Get In Touch"
             title="Tell Us About Your Day"
@@ -553,6 +639,31 @@ export default function App() {
                   className="field"
                 />
               </div>
+
+              {/* Optional design reference — filled automatically by the
+                  "I like this design" buttons, or typed in by hand. */}
+              <div className="sm:col-span-2">
+                <label className="flex flex-col">
+                  <span className="font-body text-[0.6rem] uppercase tracking-[0.18em] text-muted">
+                    Reference design <span className="text-muted/60">(optional)</span>
+                  </span>
+                  <input
+                    ref={referenceRef}
+                    type="text"
+                    name="reference_design"
+                    value={reference}
+                    onChange={(e) => setReference(e.target.value)}
+                    placeholder="e.g. W-02 — pick one from the gallery above"
+                    className="field"
+                  />
+                </label>
+                {reference && (
+                  <p className="mt-2 font-body text-xs font-light text-gold">
+                    Design {reference} will be included in your enquiry.
+                  </p>
+                )}
+              </div>
+
               <div className="sm:col-span-2">
                 <textarea
                   name="message"
@@ -588,8 +699,9 @@ export default function App() {
       </section>
 
       {/* ── FOOTER ─────────────────────────────────────────── */}
-      <footer className="border-t border-gold/25 bg-cream/60">
-        <div className="mx-auto max-w-6xl px-6 py-16 text-center">
+      <footer className="relative overflow-hidden border-t border-gold/25 bg-cream/60">
+        <Ornament variant="mandala" fade="fade-edges" />
+        <div className="relative z-10 mx-auto max-w-6xl px-6 py-16 text-center">
           <p className="font-display text-3xl font-light text-ink">StageDecor</p>
           <div className="mx-auto mt-5 flex justify-center">
             <div className="rule" />
@@ -632,11 +744,18 @@ export default function App() {
             />
             <figcaption className="mt-5 text-center">
               <span className="font-body text-[0.6rem] uppercase tracking-[0.2em] text-goldlight">
-                {lightbox.tag}
+                {lightbox.tag} · Design {lightbox.code}
               </span>
               <span className="mt-2 block font-display text-xl font-light text-ivory">
                 {lightbox.caption}
               </span>
+              <button
+                onClick={() => pickDesign(lightbox)}
+                className="mt-5 inline-flex items-center bg-gold px-6 py-2.5 font-body text-[0.62rem] uppercase tracking-[0.16em]
+                           text-ivory transition-colors duration-300 hover:bg-ivory hover:text-ink"
+              >
+                I like this design
+              </button>
             </figcaption>
           </figure>
         </div>

@@ -1,13 +1,18 @@
-// Gallery photos, with captions so each picture says what it is.
+// Gallery photos. `code` is the reference a customer quotes when they
+// want "that design" — it is shown on the tile and travels into the email.
 export const galleryImages = [
-  { file: "dec1.jpg", caption: "Ivory & Burgundy Wedding Stage", tag: "Wedding" },
-  { file: "dec5.jpeg", caption: "Gold Arch with Blush Florals", tag: "Wedding" },
-  { file: "dec4.jpeg", caption: "Grand Draped Mandap Setting", tag: "Wedding" },
-  { file: "dec2.jpg", caption: "Royal Gold & Teal Thrones", tag: "Engagement" },
-  { file: "dec3.jpeg", caption: "Champagne Drape & Floral Pillars", tag: "Reception" },
-  { file: "dec6.jpeg", caption: "Full Hall Styling & Head Table", tag: "Reception" },
-  { file: "dec7.jpeg", caption: "Guest Tables in Rose & Gold", tag: "Banquet" },
+  { code: "W-01", file: "dec1.jpg", caption: "Ivory & Burgundy Wedding Stage", tag: "Wedding" },
+  { code: "W-02", file: "dec5.jpeg", caption: "Gold Arch with Blush Florals", tag: "Wedding" },
+  { code: "W-03", file: "dec4.jpeg", caption: "Grand Draped Mandap Setting", tag: "Wedding" },
+  { code: "E-01", file: "dec2.jpg", caption: "Royal Gold & Teal Thrones", tag: "Engagement" },
+  { code: "R-01", file: "dec3.jpeg", caption: "Champagne Drape & Floral Pillars", tag: "Reception" },
+  { code: "R-02", file: "dec6.jpeg", caption: "Full Hall Styling & Head Table", tag: "Reception" },
+  { code: "B-01", file: "dec7.jpeg", caption: "Guest Tables in Rose & Gold", tag: "Banquet" },
 ];
+
+// Shown under the video tile so the code system explains itself.
+export const galleryNote =
+  "Every setup carries a reference code. Quote it when you enquire and we will recreate that look in your colours.";
 
 export const heroImage = "dec1.jpg";
 
