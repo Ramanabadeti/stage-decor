@@ -5,8 +5,11 @@ export const galleryImages = [
   { code: "W-02", file: "dec5.jpeg", caption: "Gold Arch with Blush Florals", tag: "Wedding" },
   { code: "W-03", file: "dec4.jpeg", caption: "Grand Draped Mandap Setting", tag: "Wedding" },
   { code: "E-01", file: "dec2.jpg", caption: "Royal Gold & Teal Thrones", tag: "Engagement" },
+  { code: "W-04", file: "dec8.jpeg", caption: "Burgundy & Gold Drape with Silver Chaise", tag: "Wedding" },
+  { code: "W-05", file: "dec9.jpeg", caption: "White & Gold Arch with Floral Archways", tag: "Wedding" },
   { code: "R-01", file: "dec3.jpeg", caption: "Champagne Drape & Floral Pillars", tag: "Reception" },
   { code: "R-02", file: "dec6.jpeg", caption: "Full Hall Styling & Head Table", tag: "Reception" },
+  { code: "R-03", file: "dec10.jpeg", caption: "Gold Archway with Pillars & Topiary", tag: "Reception" },
   { code: "B-01", file: "dec7.jpeg", caption: "Guest Tables in Rose & Gold", tag: "Banquet" },
 ];
 

@@ -100,6 +100,10 @@ export default function App() {
   const [status, setStatus] = useState(null);
   // Design code the customer picked from the gallery, e.g. "W-02"
   const [reference, setReference] = useState("");
+  // Any gallery file that fails to load is dropped rather than shown
+  // as a broken-image icon on a page customers are judging us by.
+  const [missing, setMissing] = useState(() => new Set());
+  const visibleGallery = galleryImages.filter((g) => !missing.has(g.file));
 
   /* "I like this design" — carry the code down to the enquiry form so the
      email that goes out has both the design AND a way to reply. */
@@ -445,7 +449,7 @@ export default function App() {
 
           {/* Editorial grid — the first photograph runs full width */}
           <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3">
-            {galleryImages.map((img, i) => (
+            {visibleGallery.map((img, i) => (
               <motion.div
                 {...fadeUp}
                 transition={{ ...fadeUp.transition, delay: (i % 3) * 0.08 }}
@@ -458,6 +462,9 @@ export default function App() {
                   src={`/${img.file}`}
                   alt={img.caption}
                   loading="lazy"
+                  onError={() =>
+                    setMissing((prev) => new Set(prev).add(img.file))
+                  }
                   className={`w-full object-cover transition-transform duration-[1.2s] group-hover:scale-[1.06] ${
                     i === 0 ? "aspect-[4/3] lg:h-full" : "aspect-square"
                   }`}
@@ -574,7 +581,7 @@ export default function App() {
       </section>
 
       {/* ── QUOTE: CLOSING ─────────────────────────────────── */}
-      <QuoteBand quote={quotes.closing} image="dec1.jpg" />
+      <QuoteBand quote={quotes.closing} image="dec8.jpeg" />
 
       {/* ── CONTACT ────────────────────────────────────────── */}
       <section id="contact" className="relative overflow-hidden py-24 sm:py-32">
