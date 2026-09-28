@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import emailjs from "@emailjs/browser";
 import {
+  business,
   galleryImages,
   galleryNote,
   heroImage,
@@ -136,9 +137,9 @@ export default function App() {
 
     const data = Object.fromEntries(new FormData(form.current).entries());
     const chosen = data.reference_design?.trim() || "";
+    const notes = data.message?.trim() || "";
 
-    // A ready-made plain-text block. Even a bare EmailJS template that only
-    // prints {{summary}} will show every answer, the design code included.
+    // Every answer as plain text.
     const summary = [
       ["Name", data.user_name],
       ["Mobile", data.user_phone],
@@ -147,12 +148,23 @@ export default function App() {
       ["Date", data.event_date],
       ["Time", data.event_time],
       ["Venue", data.event_place],
-      ["Reference design", chosen],
-      ["Notes", data.message],
+      ["Reference design", chosen || "Not specified"],
+      ["Notes", notes || "—"],
     ]
-      .filter(([, v]) => v)
-      .map(([k, v]) => `${k}: ${v}`)
+      .map(([k, v]) => `${k}: ${v || "—"}`)
       .join("\n");
+
+    /* No-data-loss guarantee.
+       The EmailJS template decides which variables get printed, and we
+       cannot see it from here. So the full summary is folded into
+       `message` as well — the one field the original template already
+       printed. Whatever that template contains, the enquiry arrives
+       complete. A template that prints the individual variables too will
+       simply repeat a few lines, which is the right trade against
+       silently dropping a customer's event date or design code. */
+    const messageWithEverything = notes
+      ? `${notes}\n\n— — — Enquiry details — — —\n${summary}`
+      : `— — — Enquiry details — — —\n${summary}`;
 
     emailjs
       .send(
@@ -162,6 +174,7 @@ export default function App() {
           ...data,
           reference_design: chosen || "Not specified",
           summary,
+          message: messageWithEverything,
         },
         "bfzg_N3Jx3h92YwQV"
       )
@@ -275,7 +288,7 @@ export default function App() {
             transition={{ duration: 0.8 }}
             className="eyebrow"
           >
-            Weddings · Engagements · Birthdays
+            {business.cityRegion} · Weddings · Engagements · Birthdays
           </motion.p>
 
           <motion.h1
@@ -296,8 +309,8 @@ export default function App() {
             className="mx-auto mt-8 max-w-xl font-body text-base font-light leading-relaxed text-muted sm:text-lg"
           >
             Floral arches, draped backdrops and warm lighting — designed around
-            your colours, built in your venue, ready before your first guest
-            arrives.
+            your colours and built in your {business.city} venue, ready before
+            your first guest arrives.
           </motion.p>
 
           <motion.div
@@ -342,8 +355,9 @@ export default function App() {
             <div className="rule mt-6" />
             <p className="mt-8 font-body text-[1.02rem] font-light leading-[1.85] text-muted">
               We design and build stage décor for weddings, engagements,
-              birthdays and corporate events. Every setup begins with your
-              colours and your venue — never a template.
+              birthdays and corporate events across {business.city} and the
+              surrounding Wisconsin area. Every setup begins with your colours
+              and your venue — never a template.
             </p>
             <p className="mt-5 font-body text-[1.02rem] font-light leading-[1.85] text-muted">
               Because we own our backdrops, florals, draping, seating and
@@ -709,24 +723,72 @@ export default function App() {
       <footer className="relative overflow-hidden border-t border-gold/25 bg-cream/60">
         <Ornament variant="mandala" fade="fade-edges" />
         <div className="relative z-10 mx-auto max-w-6xl px-6 py-16 text-center">
-          <p className="font-display text-3xl font-light text-ink">StageDecor</p>
+          <p className="font-display text-3xl font-light text-ink">
+            {business.name}
+          </p>
           <div className="mx-auto mt-5 flex justify-center">
             <div className="rule" />
           </div>
-          <p className="mt-8 font-body text-[0.7rem] uppercase tracking-[0.2em] text-muted">
-            Maumud Mubshar
+          <p className="mt-6 font-body text-[0.7rem] uppercase tracking-[0.2em] text-gold">
+            Stage &amp; Event Decoration · {business.cityRegion}
+          </p>
+          <p className="mt-6 font-body text-[0.7rem] uppercase tracking-[0.2em] text-muted">
+            {business.contactName}
           </p>
           <a
-            href="tel:4145422294"
+            href={`tel:${business.phone}`}
             className="mt-3 inline-block font-display text-2xl font-light text-gold transition-colors hover:text-ink"
           >
-            (414) 542-2294
+            {business.phoneDisplay}
           </a>
+          <div className="mt-5 flex justify-center">
+            <a
+              href={`https://wa.me/${business.whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-body text-[0.68rem] uppercase tracking-[0.18em] text-muted underline underline-offset-4 transition-colors hover:text-gold"
+            >
+              Message us on WhatsApp
+            </a>
+          </div>
           <p className="mt-10 font-body text-[0.68rem] font-light tracking-wide text-muted/80">
-            &copy; {new Date().getFullYear()} StageDecor. All rights reserved.
+            &copy; {new Date().getFullYear()} {business.name}. Serving{" "}
+            {business.city} and surrounding areas. All rights reserved.
           </p>
         </div>
       </footer>
+
+      {/* ── FLOATING CONTACT ───────────────────────────────────
+          Always within thumb reach. On a phone these are the two
+          actions that actually turn a visitor into a booking. */}
+      <div className="fixed bottom-5 right-5 z-40 flex flex-col gap-3 print:hidden">
+        <a
+          href={`https://wa.me/${business.whatsapp}?text=${encodeURIComponent(
+            "Hello StageDecor, I would like to enquire about stage decoration for my event."
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Message us on WhatsApp"
+          className="flex items-center justify-center rounded-full bg-[#25D366] p-3.5 shadow-soft
+                     transition-transform duration-300 hover:scale-110"
+        >
+          <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white" aria-hidden="true">
+            <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.18-1.41-.07-.13-.27-.2-.57-.35z" />
+            <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.87 9.87 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.11.82.83-3.04-.2-.31a8.17 8.17 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.69 8.23-8.24 8.23z" />
+          </svg>
+        </a>
+
+        <a
+          href={`tel:${business.phone}`}
+          aria-label={`Call ${business.phoneDisplay}`}
+          className="flex items-center justify-center rounded-full bg-gold p-3.5 shadow-soft
+                     transition-transform duration-300 hover:scale-110"
+        >
+          <svg viewBox="0 0 24 24" className="h-6 w-6 fill-ivory" aria-hidden="true">
+            <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+          </svg>
+        </a>
+      </div>
 
       {/* ── LIGHTBOX ───────────────────────────────────────── */}
       {lightbox && (

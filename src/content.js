@@ -1,3 +1,16 @@
+// One place for the business details that appear across the site.
+export const business = {
+  name: "StageDecor",
+  contactName: "Maumud Mubshar",
+  city: "Milwaukee",
+  region: "WI",
+  cityRegion: "Milwaukee, WI",
+  // Digits only — used to build tel: and wa.me links
+  phone: "4146171267",
+  phoneDisplay: "(414) 617-1267",
+  whatsapp: "14146171267",
+};
+
 // Gallery photos. `code` is the reference a customer quotes when they
 // want "that design" — it is shown on the tile and travels into the email.
 export const galleryImages = [
