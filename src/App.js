@@ -14,9 +14,10 @@ import "./App.css";
 
 // Swiper powers the phone carousel
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination } from "swiper/modules";
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
+import "swiper/css/navigation";
 
 /* Full-screen viewer with zoom. Supports the pinch gesture, the wheel,
    double-tap and explicit buttons, because on a phone people reach for
@@ -50,10 +51,19 @@ function Lightbox({ img, onClose, onPick }) {
     if (scale === MIN) setOffset({ x: 0, y: 0 });
   }, [scale]);
 
-  const onWheel = (e) => {
-    e.preventDefault();
-    zoomBy(e.deltaY > 0 ? -0.35 : 0.35);
-  };
+  /* React attaches onWheel passively, so preventDefault() there only logs
+     a warning. Bind it ourselves with passive:false instead. */
+  const stageRef = useRef(null);
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return undefined;
+    const onWheel = (e) => {
+      e.preventDefault();
+      zoomBy(e.deltaY > 0 ? -0.35 : 0.35);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
 
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
@@ -124,9 +134,9 @@ function Lightbox({ img, onClose, onPick }) {
 
       {/* The picture */}
       <div
+        ref={stageRef}
         className="flex flex-1 items-center justify-center overflow-hidden px-4"
         style={{ touchAction: "none" }}
-        onWheel={onWheel}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -349,6 +359,29 @@ export default function App() {
   const reduceMotion =
     typeof window !== "undefined" &&
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+  const swiperRef = useRef(null);
+
+  /* Swiper does not reliably begin autoplay when its slides are rendered
+     by React and loop mode rebuilds them, so start it once the instance
+     exists and restart it whenever the slide list changes. */
+  useEffect(() => {
+    if (reduceMotion) return undefined;
+    const kick = () => {
+      const sw = swiperRef.current;
+      if (sw && !sw.destroyed && sw.autoplay && !sw.autoplay.running) {
+        sw.autoplay.start();
+      }
+    };
+    kick();
+    const t = window.setTimeout(kick, 600);
+    // Browsers suspend timers on a hidden tab; resume when it comes back
+    document.addEventListener("visibilitychange", kick);
+    return () => {
+      window.clearTimeout(t);
+      document.removeEventListener("visibilitychange", kick);
+    };
+  }, [reduceMotion, visibleGallery.length]);
 
   /* "I like this design" — carry the code down to the enquiry form so the
      email that goes out has both the design AND a way to reply. */
@@ -714,18 +747,32 @@ export default function App() {
           <SectionHeading eyebrow="Our Work" title="Gallery" />
 
           {/* PHONE — auto-advancing carousel, every design in one place */}
-          <motion.div {...fadeUp} className="md:hidden">
+          <motion.div {...fadeUp} className="relative md:hidden">
             <Swiper
-              modules={[Autoplay, Pagination]}
+              modules={[Autoplay, Pagination, Navigation]}
               slidesPerView={1}
               spaceBetween={16}
               loop={visibleGallery.length > 2}
               autoplay={
                 reduceMotion
                   ? false
-                  : { delay: 2000, disableOnInteraction: false }
+                  : {
+                      delay: 2000,
+                      disableOnInteraction: false,
+                      pauseOnMouseEnter: false,
+                      // A transition that never resolves otherwise stalls
+                      // the whole chain and autoplay silently stops.
+                      waitForTransition: false,
+                    }
               }
+              navigation={{
+                prevEl: ".gallery-prev",
+                nextEl: ".gallery-next",
+              }}
               pagination={{ clickable: true }}
+              onSwiper={(sw) => {
+                swiperRef.current = sw;
+              }}
               className="gallery-swiper !pb-12"
             >
               {visibleGallery.map((img) => (
@@ -760,6 +807,28 @@ export default function App() {
                 </figure>
               </SwiperSlide>
             </Swiper>
+
+            {/* Transparent arrows, sitting over the photograph */}
+            <button
+              className="gallery-prev absolute left-2 top-[28%] z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center
+                         rounded-full border border-ivory/40 bg-ink/25 text-ivory backdrop-blur-sm
+                         transition-colors duration-300 active:bg-ink/50"
+              aria-label="Previous design"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
+                <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+              </svg>
+            </button>
+            <button
+              className="gallery-next absolute right-2 top-[28%] z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center
+                         rounded-full border border-ivory/40 bg-ink/25 text-ivory backdrop-blur-sm
+                         transition-colors duration-300 active:bg-ink/50"
+              aria-label="Next design"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
+                <path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+              </svg>
+            </button>
           </motion.div>
 
           {/* DESKTOP — grid of the same cards */}
