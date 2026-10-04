@@ -94,6 +94,29 @@
   mask-image: radial-gradient(ellipse 62% 58% at 50% 50%, transparent 38%, #000 100%);
 }
 
+/* ── GALLERY CAROUSEL (phone) ─────────────────────────────
+   Swiper's own dots recoloured to the gold palette, and slides
+   stretched so every card in a row matches height.            */
+.gallery-swiper .swiper-slide {
+  height: auto;
+  display: flex;
+}
+.gallery-swiper .swiper-slide > * {
+  width: 100%;
+}
+.gallery-swiper .swiper-pagination-bullet {
+  width: 7px;
+  height: 7px;
+  background: #3a332d;
+  opacity: 0.22;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.gallery-swiper .swiper-pagination-bullet-active {
+  background: #b8954f;
+  opacity: 1;
+  transform: scale(1.35);
+}
+
 /* Gallery lightbox fade */
 @keyframes fadeIn {
   from { opacity: 0; }

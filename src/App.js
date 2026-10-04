@@ -12,6 +12,244 @@ import {
 } from "./content";
 import "./App.css";
 
+// Swiper powers the phone carousel
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+
+/* Full-screen viewer with zoom. Supports the pinch gesture, the wheel,
+   double-tap and explicit buttons, because on a phone people reach for
+   pinch and on a desktop they look for a + button. */
+function Lightbox({ img, onClose, onPick }) {
+  const MIN = 1;
+  const MAX = 4;
+  const [scale, setScale] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const pointers = useRef(new Map());
+  const pinchStart = useRef(null);
+  const panStart = useRef(null);
+
+  const reset = () => {
+    setScale(1);
+    setOffset({ x: 0, y: 0 });
+  };
+
+  // Start fresh whenever a different design is opened
+  useEffect(reset, [img.file]);
+
+  const clamp = (s) => Math.min(MAX, Math.max(MIN, s));
+
+  // Functional updates: several clicks (or wheel ticks) can land before a
+  // re-render, and each must build on the last, not on a stale value.
+  const zoomBy = (delta) => setScale((s) => clamp(s + delta));
+  const zoomTo = (value) => setScale(() => clamp(value));
+
+  // Once fully zoomed out there is nothing to pan to
+  useEffect(() => {
+    if (scale === MIN) setOffset({ x: 0, y: 0 });
+  }, [scale]);
+
+  const onWheel = (e) => {
+    e.preventDefault();
+    zoomBy(e.deltaY > 0 ? -0.35 : 0.35);
+  };
+
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+
+  const onPointerDown = (e) => {
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+
+    if (pointers.current.size === 2) {
+      const [p1, p2] = [...pointers.current.values()];
+      pinchStart.current = { d: dist(p1, p2), scale };
+      panStart.current = null;
+    } else if (scale > MIN) {
+      panStart.current = {
+        startX: e.clientX,
+        startY: e.clientY,
+        ox: offset.x,
+        oy: offset.y,
+      };
+    }
+  };
+
+  const onPointerMove = (e) => {
+    if (!pointers.current.has(e.pointerId)) return;
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointers.current.size === 2 && pinchStart.current) {
+      const [p1, p2] = [...pointers.current.values()];
+      const ratio = dist(p1, p2) / (pinchStart.current.d || 1);
+      zoomTo(pinchStart.current.scale * ratio);
+      return;
+    }
+
+    if (panStart.current) {
+      setOffset({
+        x: panStart.current.ox + (e.clientX - panStart.current.startX),
+        y: panStart.current.oy + (e.clientY - panStart.current.startY),
+      });
+    }
+  };
+
+  const onPointerUp = (e) => {
+    pointers.current.delete(e.pointerId);
+    if (pointers.current.size < 2) pinchStart.current = null;
+    if (pointers.current.size === 0) panStart.current = null;
+  };
+
+  return (
+    <div
+      className="animate-fade fixed inset-0 z-[60] flex flex-col bg-ink"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Design ${img.code}`}
+    >
+      {/* Top bar: code and close */}
+      <div className="flex items-center justify-between px-5 py-4">
+        <span className="font-body text-[0.65rem] uppercase tracking-[0.2em] text-goldlight">
+          {img.tag} · Design {img.code}
+        </span>
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-ivory/15 text-2xl font-light text-ivory
+                     transition-colors hover:bg-ivory hover:text-ink"
+        >
+          ×
+        </button>
+      </div>
+
+      {/* The picture */}
+      <div
+        className="flex flex-1 items-center justify-center overflow-hidden px-4"
+        style={{ touchAction: "none" }}
+        onWheel={onWheel}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onDoubleClick={() => zoomTo(scale > 1 ? 1 : 2.5)}
+      >
+        <img
+          src={`/${img.file}`}
+          alt={img.caption}
+          draggable="false"
+          className="max-h-full max-w-full select-none object-contain shadow-soft"
+          style={{
+            transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
+            transition: panStart.current || pinchStart.current ? "none" : "transform 0.25s ease",
+            cursor: scale > 1 ? "grab" : "zoom-in",
+          }}
+        />
+      </div>
+
+      {/* Bottom bar: caption, zoom controls, action */}
+      <div className="px-5 pb-6 pt-4">
+        <p className="text-center font-display text-lg font-light text-ivory">
+          {img.caption}
+        </p>
+
+        <div className="mt-4 flex items-center justify-center gap-3">
+          <button
+            onClick={() => zoomBy(-0.5)}
+            disabled={scale <= MIN}
+            aria-label="Zoom out"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-ivory/15 text-xl text-ivory
+                       transition-colors hover:bg-ivory hover:text-ink disabled:opacity-30 disabled:hover:bg-ivory/15 disabled:hover:text-ivory"
+          >
+            −
+          </button>
+          <span className="w-14 text-center font-body text-[0.65rem] uppercase tracking-[0.15em] text-ivory/70">
+            {Math.round(scale * 100)}%
+          </span>
+          <button
+            onClick={() => zoomBy(0.5)}
+            disabled={scale >= MAX}
+            aria-label="Zoom in"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-ivory/15 text-xl text-ivory
+                       transition-colors hover:bg-ivory hover:text-ink disabled:opacity-30 disabled:hover:bg-ivory/15 disabled:hover:text-ivory"
+          >
+            +
+          </button>
+          {scale > 1 && (
+            <button
+              onClick={reset}
+              className="ml-2 font-body text-[0.6rem] uppercase tracking-[0.15em] text-ivory/70 underline underline-offset-4 hover:text-goldlight"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+
+        <div className="mt-5 flex justify-center">
+          <button
+            onClick={() => onPick(img)}
+            className="inline-flex items-center bg-gold px-6 py-2.5 font-body text-[0.62rem] uppercase tracking-[0.16em]
+                       text-ivory transition-colors duration-300 hover:bg-ivory hover:text-ink"
+          >
+            I like this design
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* One gallery card, used by both the phone carousel and the desktop grid.
+   The number sits ON the photograph; the description and the action sit
+   BELOW it, so nothing covers the design the customer is judging. */
+function GalleryCard({ img, onOpen, onPick, onMissing, tall = false }) {
+  return (
+    <figure className="group flex h-full flex-col overflow-hidden bg-white/80 shadow-card backdrop-blur-sm">
+      <button
+        onClick={() => onOpen(img)}
+        aria-label={`Open design ${img.code} — ${img.caption}`}
+        className="relative block w-full overflow-hidden"
+      >
+        <img
+          src={`/${img.file}`}
+          alt={img.caption}
+          loading="lazy"
+          onError={() => onMissing(img.file)}
+          className={`w-full object-cover transition-transform duration-[1.2s] group-hover:scale-[1.05] ${
+            tall ? "aspect-[4/3]" : "aspect-[4/3]"
+          }`}
+        />
+        {/* Picture number, over the photograph */}
+        <span className="absolute left-3 top-3 bg-ivory/90 px-2.5 py-1 font-body text-[0.62rem] uppercase tracking-[0.18em] text-ink shadow-sm backdrop-blur-sm">
+          {img.code}
+        </span>
+        {/* Hint that the picture opens */}
+        <span className="pointer-events-none absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-ivory/85 text-ink opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
+            <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zm.5-7H9v2H7v1h2v2h1v-2h2V9h-2V7z" />
+          </svg>
+        </span>
+      </button>
+
+      {/* Description and action, below the photograph */}
+      <figcaption className="flex flex-1 flex-col items-start p-5">
+        <span className="font-body text-[0.58rem] uppercase tracking-[0.2em] text-gold">
+          {img.tag} · {img.code}
+        </span>
+        <h3 className="mt-2 font-display text-xl font-light leading-snug text-ink">
+          {img.caption}
+        </h3>
+        <button
+          onClick={() => onPick(img)}
+          className="mt-4 inline-flex items-center bg-gold px-5 py-2.5 font-body text-[0.6rem] uppercase tracking-[0.16em]
+                     text-ivory transition-colors duration-300 hover:bg-ink"
+        >
+          I like this design
+        </button>
+      </figcaption>
+    </figure>
+  );
+}
+
 /* Faint line-art motif layer sitting behind a section's content.
    `variant` picks the pattern, `fade` keeps it off the middle of the page. */
 function Ornament({ variant = "quatrefoil", fade = "fade-edges" }) {
@@ -105,6 +343,12 @@ export default function App() {
   // as a broken-image icon on a page customers are judging us by.
   const [missing, setMissing] = useState(() => new Set());
   const visibleGallery = galleryImages.filter((g) => !missing.has(g.file));
+  const markMissing = (file) => setMissing((prev) => new Set(prev).add(file));
+
+  // Respect a reduced-motion preference by not auto-advancing the carousel
+  const reduceMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
   /* "I like this design" — carry the code down to the enquiry form so the
      email that goes out has both the design AND a way to reply. */
@@ -130,6 +374,14 @@ export default function App() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  // Stop the page scrolling behind the open viewer
+  useEffect(() => {
+    document.body.style.overflow = lightbox ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [lightbox]);
 
   const sendEmail = (e) => {
     e.preventDefault();
@@ -461,68 +713,75 @@ export default function App() {
         <div className="relative z-10 mx-auto max-w-6xl px-6">
           <SectionHeading eyebrow="Our Work" title="Gallery" />
 
-          {/* Editorial grid — the first photograph runs full width */}
-          <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3">
+          {/* PHONE — auto-advancing carousel, every design in one place */}
+          <motion.div {...fadeUp} className="md:hidden">
+            <Swiper
+              modules={[Autoplay, Pagination]}
+              slidesPerView={1}
+              spaceBetween={16}
+              loop={visibleGallery.length > 2}
+              autoplay={
+                reduceMotion
+                  ? false
+                  : { delay: 2000, disableOnInteraction: false }
+              }
+              pagination={{ clickable: true }}
+              className="gallery-swiper !pb-12"
+            >
+              {visibleGallery.map((img) => (
+                <SwiperSlide key={img.file} className="!h-auto">
+                  <GalleryCard
+                    img={img}
+                    onOpen={setLightbox}
+                    onPick={pickDesign}
+                    onMissing={markMissing}
+                  />
+                </SwiperSlide>
+              ))}
+              <SwiperSlide className="!h-auto">
+                <figure className="flex h-full flex-col overflow-hidden bg-white/80 shadow-card backdrop-blur-sm">
+                  <video
+                    src="/vid1.mp4"
+                    controls
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    className="aspect-[4/3] w-full object-cover"
+                  />
+                  <figcaption className="p-5">
+                    <span className="font-body text-[0.58rem] uppercase tracking-[0.2em] text-gold">
+                      Walkthrough
+                    </span>
+                    <h3 className="mt-2 font-display text-xl font-light text-ink">
+                      See a setup in motion
+                    </h3>
+                  </figcaption>
+                </figure>
+              </SwiperSlide>
+            </Swiper>
+          </motion.div>
+
+          {/* DESKTOP — grid of the same cards */}
+          <div className="hidden gap-5 md:grid md:grid-cols-2 lg:grid-cols-3">
             {visibleGallery.map((img, i) => (
               <motion.div
                 {...fadeUp}
                 transition={{ ...fadeUp.transition, delay: (i % 3) * 0.08 }}
                 key={img.file}
-                className={`group relative overflow-hidden bg-linen shadow-card ${
-                  i === 0 ? "col-span-2 lg:col-span-2 lg:row-span-2" : ""
-                }`}
               >
-                <img
-                  src={`/${img.file}`}
-                  alt={img.caption}
-                  loading="lazy"
-                  onError={() =>
-                    setMissing((prev) => new Set(prev).add(img.file))
-                  }
-                  className={`w-full object-cover transition-transform duration-[1.2s] group-hover:scale-[1.06] ${
-                    i === 0 ? "aspect-[4/3] lg:h-full" : "aspect-square"
-                  }`}
+                <GalleryCard
+                  img={img}
+                  onOpen={setLightbox}
+                  onPick={pickDesign}
+                  onMissing={markMissing}
                 />
-
-                {/* Whole tile opens the lightbox */}
-                <button
-                  onClick={() => setLightbox(img)}
-                  aria-label={`View design ${img.code} — ${img.caption}`}
-                  className="absolute inset-0 z-10 cursor-pointer"
-                />
-
-                {/* Design code — always visible, so it can be quoted */}
-                <span className="pointer-events-none absolute left-3 top-3 z-20 bg-ivory/90 px-2.5 py-1 font-body text-[0.6rem] uppercase tracking-[0.18em] text-ink shadow-sm backdrop-blur-sm">
-                  {img.code}
-                </span>
-
-                {/* Caption + action. Always shown on touch, on hover for pointers. */}
-                <div
-                  className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-ink/85 via-ink/55 to-transparent p-4 text-left
-                             opacity-100 transition-opacity duration-500
-                             md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
-                >
-                  <span className="block font-body text-[0.6rem] uppercase tracking-[0.2em] text-goldlight">
-                    {img.tag} · {img.code}
-                  </span>
-                  <span className="mt-1 block font-display text-lg font-light leading-tight text-ivory">
-                    {img.caption}
-                  </span>
-                  <button
-                    onClick={() => pickDesign(img)}
-                    className="mt-3 inline-flex items-center gap-1.5 bg-gold px-4 py-2 font-body text-[0.6rem] uppercase tracking-[0.16em]
-                               text-ivory transition-colors duration-300 hover:bg-ivory hover:text-ink"
-                  >
-                    I like this design
-                  </button>
-                </div>
               </motion.div>
             ))}
 
-            {/* Video tile */}
-            <motion.div
+            <motion.figure
               {...fadeUp}
-              className="overflow-hidden bg-linen shadow-card"
+              className="flex flex-col overflow-hidden bg-white/80 shadow-card backdrop-blur-sm"
             >
               <video
                 src="/vid1.mp4"
@@ -531,9 +790,17 @@ export default function App() {
                 loop
                 playsInline
                 preload="metadata"
-                className="aspect-square w-full object-cover"
+                className="aspect-[4/3] w-full object-cover"
               />
-            </motion.div>
+              <figcaption className="p-5">
+                <span className="font-body text-[0.58rem] uppercase tracking-[0.2em] text-gold">
+                  Walkthrough
+                </span>
+                <h3 className="mt-2 font-display text-xl font-light text-ink">
+                  See a setup in motion
+                </h3>
+              </figcaption>
+            </motion.figure>
           </div>
 
           <motion.p
@@ -761,7 +1028,11 @@ export default function App() {
       {/* ── FLOATING CONTACT ───────────────────────────────────
           Always within thumb reach. On a phone these are the two
           actions that actually turn a visitor into a booking. */}
-      <div className="fixed bottom-5 right-5 z-40 flex flex-col gap-3 print:hidden">
+      <div
+        className={`fixed bottom-5 right-5 z-40 flex-col gap-3 print:hidden ${
+          lightbox ? "hidden" : "flex"
+        }`}
+      >
         <a
           href={`https://wa.me/${business.whatsapp}?text=${encodeURIComponent(
             "Hello StageDecor, I would like to enquire about stage decoration for my event."
@@ -792,42 +1063,11 @@ export default function App() {
 
       {/* ── LIGHTBOX ───────────────────────────────────────── */}
       {lightbox && (
-        <div
-          className="animate-fade fixed inset-0 z-50 flex items-center justify-center bg-ink/80 p-6 backdrop-blur-sm"
-          onClick={() => setLightbox(null)}
-          role="dialog"
-          aria-modal="true"
-        >
-          <button
-            onClick={() => setLightbox(null)}
-            aria-label="Close"
-            className="absolute right-6 top-6 font-body text-3xl font-light text-ivory transition-colors hover:text-goldlight"
-          >
-            ×
-          </button>
-          <figure onClick={(e) => e.stopPropagation()} className="max-w-5xl">
-            <img
-              src={`/${lightbox.file}`}
-              alt={lightbox.caption}
-              className="max-h-[80vh] w-auto border-8 border-ivory/95 object-contain shadow-soft"
-            />
-            <figcaption className="mt-5 text-center">
-              <span className="font-body text-[0.6rem] uppercase tracking-[0.2em] text-goldlight">
-                {lightbox.tag} · Design {lightbox.code}
-              </span>
-              <span className="mt-2 block font-display text-xl font-light text-ivory">
-                {lightbox.caption}
-              </span>
-              <button
-                onClick={() => pickDesign(lightbox)}
-                className="mt-5 inline-flex items-center bg-gold px-6 py-2.5 font-body text-[0.62rem] uppercase tracking-[0.16em]
-                           text-ivory transition-colors duration-300 hover:bg-ivory hover:text-ink"
-              >
-                I like this design
-              </button>
-            </figcaption>
-          </figure>
-        </div>
+        <Lightbox
+          img={lightbox}
+          onClose={() => setLightbox(null)}
+          onPick={pickDesign}
+        />
       )}
     </div>
   );
