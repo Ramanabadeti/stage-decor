@@ -757,7 +757,7 @@ export default function App() {
                 reduceMotion
                   ? false
                   : {
-                      delay: 2000,
+                      delay: 4000,
                       disableOnInteraction: false,
                       pauseOnMouseEnter: false,
                       // A transition that never resolves otherwise stalls
