@@ -20,6 +20,7 @@ export const galleryImages = [
   { code: "E-01", file: "dec2.jpg", caption: "Royal Gold & Teal Thrones", tag: "Engagement" },
   { code: "W-04", file: "dec8.jpeg", caption: "Burgundy & Gold Drape with Silver Chaise", tag: "Wedding" },
   { code: "W-05", file: "dec9.jpeg", caption: "White & Gold Arch with Floral Archways", tag: "Wedding" },
+  { code: "W-06", file: "dec11.jpeg", caption: "Champagne & Ivory Drape with Rose Garland", tag: "Wedding" },
   { code: "R-01", file: "dec3.jpeg", caption: "Champagne Drape & Floral Pillars", tag: "Reception" },
   { code: "R-02", file: "dec6.jpeg", caption: "Full Hall Styling & Head Table", tag: "Reception" },
   { code: "R-03", file: "dec10.jpeg", caption: "Gold Archway with Pillars & Topiary", tag: "Reception" },
