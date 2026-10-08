@@ -9,27 +9,24 @@
 
   body {
     @apply bg-ivory text-ink font-body antialiased;
-    /* Elegant light ground: warm ivory with the faintest blush and gold bloom */
-    background-image:
-      radial-gradient(60rem 40rem at 12% -10%, rgba(235, 217, 210, 0.45), transparent 60%),
-      radial-gradient(50rem 36rem at 92% 8%, rgba(212, 184, 122, 0.22), transparent 62%),
-      radial-gradient(70rem 50rem at 50% 108%, rgba(239, 230, 216, 0.75), transparent 65%);
+    /* One quiet woven texture across the whole page, nothing more.
+       Light, clean, and never competing with the photographs. */
+    background-color: #fdfbf7;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23B8954F' stroke-width='1' opacity='0.28'%3E%3Cg transform='translate(30 30)'%3E%3Cellipse cx='0' cy='-6' rx='3.4' ry='6'/%3E%3Cellipse cx='6' cy='0' rx='6' ry='3.4'/%3E%3Cellipse cx='0' cy='6' rx='3.4' ry='6'/%3E%3Cellipse cx='-6' cy='0' rx='6' ry='3.4'/%3E%3C/g%3E%3Cg transform='translate(90 90)'%3E%3Cellipse cx='0' cy='-6' rx='3.4' ry='6'/%3E%3Cellipse cx='6' cy='0' rx='6' ry='3.4'/%3E%3Cellipse cx='0' cy='6' rx='3.4' ry='6'/%3E%3Cellipse cx='-6' cy='0' rx='6' ry='3.4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-size: 120px 120px;
     background-attachment: fixed;
   }
 
-  /* Anchor links land below the fixed header instead of underneath it */
   section[id] {
     scroll-margin-top: 5.5rem;
   }
 }
 
 @layer components {
-  /* Small gold eyebrow label above each section title */
   .eyebrow {
     @apply font-body text-[0.68rem] uppercase tracking-luxe text-gold;
   }
 
-  /* Thin gold rule with a diamond at its centre */
   .rule {
     @apply relative h-px w-24 bg-gold/40;
   }
@@ -39,70 +36,33 @@
   }
 
   .btn-gold {
-    @apply inline-flex items-center justify-center bg-gold px-8 py-3 font-body text-xs uppercase tracking-luxe text-ivory
-           transition-colors duration-300 hover:bg-ink;
+    @apply inline-flex items-center justify-center bg-gold px-7 py-3 font-body text-xs uppercase tracking-luxe
+           text-ivory transition-colors duration-300 hover:bg-ink;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center border border-ink/25 bg-white/70 px-8 py-3 font-body text-xs
-           uppercase tracking-luxe text-ink backdrop-blur transition-colors duration-300 hover:border-gold hover:text-gold;
+    @apply inline-flex items-center justify-center border border-ink/20 bg-white/70 px-7 py-3 font-body text-xs
+           uppercase tracking-luxe text-ink transition-colors duration-300 hover:border-gold hover:text-gold;
   }
 
   .field {
-    @apply w-full border-b border-ink/20 bg-transparent px-1 py-3 font-body text-[0.95rem] text-ink
+    @apply w-full border border-ink/15 bg-white/80 px-4 py-3 font-body text-[0.95rem] text-ink
            placeholder:text-muted/70 focus:border-gold focus:outline-none transition-colors;
+  }
+
+  /* Category filter pills */
+  .chip {
+    @apply inline-flex items-center border border-ink/15 bg-white/70 px-4 py-2 font-body text-[0.62rem]
+           uppercase tracking-[0.16em] text-muted transition-colors duration-200 hover:border-gold hover:text-gold;
+  }
+  .chip-on {
+    @apply border-gold bg-gold text-ivory hover:text-ivory;
   }
 }
 
-/* ── DECORATIVE ORNAMENTS ─────────────────────────────────
-   Two line-art motifs drawn as tiling SVG, used as a faint
-   texture behind sections. Kept very low contrast so they
-   read as paper texture, never as clutter.                  */
-
-.ornament {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-repeat: repeat;
-}
-
-/* Four-petal quatrefoil, scattered on the diagonal */
-.ornament--quatrefoil {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23B8954F' stroke-width='1.2'%3E%3Cg transform='translate(25 25)'%3E%3Cellipse cx='0' cy='-8' rx='4.6' ry='8'/%3E%3Cellipse cx='8' cy='0' rx='8' ry='4.6'/%3E%3Cellipse cx='0' cy='8' rx='4.6' ry='8'/%3E%3Cellipse cx='-8' cy='0' rx='8' ry='4.6'/%3E%3C/g%3E%3Cg transform='translate(75 75)'%3E%3Cellipse cx='0' cy='-8' rx='4.6' ry='8'/%3E%3Cellipse cx='8' cy='0' rx='8' ry='4.6'/%3E%3Cellipse cx='0' cy='8' rx='4.6' ry='8'/%3E%3Cellipse cx='-8' cy='0' rx='8' ry='4.6'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  background-size: 100px 100px;
-  opacity: 0.38;
-}
-
-/* Eight-petal floral mandala with small corner buds */
-.ornament--mandala {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Cg fill='none' stroke='%23B8954F' stroke-width='1.1'%3E%3Cg transform='translate(75 75)'%3E%3Cellipse cx='0' cy='-19' rx='5.4' ry='17'/%3E%3Cellipse cx='0' cy='-19' rx='5.4' ry='17' transform='rotate(45)'/%3E%3Cellipse cx='0' cy='-19' rx='5.4' ry='17' transform='rotate(90)'/%3E%3Cellipse cx='0' cy='-19' rx='5.4' ry='17' transform='rotate(135)'/%3E%3Cellipse cx='0' cy='-19' rx='5.4' ry='17' transform='rotate(180)'/%3E%3Cellipse cx='0' cy='-19' rx='5.4' ry='17' transform='rotate(225)'/%3E%3Cellipse cx='0' cy='-19' rx='5.4' ry='17' transform='rotate(270)'/%3E%3Cellipse cx='0' cy='-19' rx='5.4' ry='17' transform='rotate(315)'/%3E%3Ccircle r='4.5'/%3E%3C/g%3E%3Cg transform='translate(0 0)'%3E%3Cellipse cx='0' cy='-7' rx='4' ry='7'/%3E%3Cellipse cx='7' cy='0' rx='7' ry='4'/%3E%3Cellipse cx='0' cy='7' rx='4' ry='7'/%3E%3Cellipse cx='-7' cy='0' rx='7' ry='4'/%3E%3C/g%3E%3Cg transform='translate(150 0)'%3E%3Cellipse cx='0' cy='-7' rx='4' ry='7'/%3E%3Cellipse cx='7' cy='0' rx='7' ry='4'/%3E%3Cellipse cx='0' cy='7' rx='4' ry='7'/%3E%3Cellipse cx='-7' cy='0' rx='7' ry='4'/%3E%3C/g%3E%3Cg transform='translate(0 150)'%3E%3Cellipse cx='0' cy='-7' rx='4' ry='7'/%3E%3Cellipse cx='7' cy='0' rx='7' ry='4'/%3E%3Cellipse cx='0' cy='7' rx='4' ry='7'/%3E%3Cellipse cx='-7' cy='0' rx='7' ry='4'/%3E%3C/g%3E%3Cg transform='translate(150 150)'%3E%3Cellipse cx='0' cy='-7' rx='4' ry='7'/%3E%3Cellipse cx='7' cy='0' rx='7' ry='4'/%3E%3Cellipse cx='0' cy='7' rx='4' ry='7'/%3E%3Cellipse cx='-7' cy='0' rx='7' ry='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  background-size: 150px 150px;
-  opacity: 0.32;
-}
-
-/* Fades so the pattern never runs edge to edge */
-.ornament--fade-tl {
-  -webkit-mask-image: linear-gradient(135deg, #000 0%, rgba(0, 0, 0, 0.45) 26%, transparent 52%);
-  mask-image: linear-gradient(135deg, #000 0%, rgba(0, 0, 0, 0.45) 26%, transparent 52%);
-}
-.ornament--fade-br {
-  -webkit-mask-image: linear-gradient(315deg, #000 0%, rgba(0, 0, 0, 0.45) 26%, transparent 52%);
-  mask-image: linear-gradient(315deg, #000 0%, rgba(0, 0, 0, 0.45) 26%, transparent 52%);
-}
-.ornament--fade-edges {
-  -webkit-mask-image: radial-gradient(ellipse 62% 58% at 50% 50%, transparent 38%, #000 100%);
-  mask-image: radial-gradient(ellipse 62% 58% at 50% 50%, transparent 38%, #000 100%);
-}
-
-/* ── GALLERY CAROUSEL (phone) ─────────────────────────────
-   Swiper's own dots recoloured to the gold palette, and slides
-   stretched so every card in a row matches height.            */
+/* Phone carousel */
 .gallery-swiper .swiper-slide {
   height: auto;
-  display: flex;
-}
-.gallery-swiper .swiper-slide > * {
-  width: 100%;
 }
 .gallery-swiper .swiper-pagination-bullet {
   width: 7px;
@@ -117,16 +77,39 @@
   transform: scale(1.35);
 }
 
-/* Gallery lightbox fade */
+/* Brief ring on the picture a thumbnail jumped to */
+@keyframes flagIt {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(184, 149, 79, 0);
+  }
+  25%,
+  75% {
+    box-shadow: 0 0 0 4px rgba(184, 149, 79, 0.85);
+  }
+}
+.flag-it {
+  animation: flagIt 1.8s ease both;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 .animate-fade {
-  animation: fadeIn 0.35s ease both;
+  animation: fadeIn 0.3s ease both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .animate-fade { animation: none; }
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-fade,
+  .flag-it {
+    animation: none;
+  }
 }
