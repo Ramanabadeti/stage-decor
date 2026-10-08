@@ -399,10 +399,6 @@ export default function App() {
         <div className="mx-auto mt-6 flex justify-center">
           <div className="rule" />
         </div>
-        <p className="mx-auto mt-6 max-w-xl font-body text-[0.95rem] font-light leading-relaxed text-muted">
-          Pick a design below, note its number, and send it to us. We build it in
-          your colours at your venue.
-        </p>
       </section>
 
       {/* ── GALLERY ────────────────────────────────────────── */}
@@ -502,12 +498,12 @@ export default function App() {
 
           {/* ===== DESKTOP / TABLET: thumb rail left, big pictures right ===== */}
           {isDesktop && (
-          <div className="grid gap-6 md:grid-cols-[130px_1fr] lg:gap-8 lg:grid-cols-[150px_1fr]">
+          <div className="grid gap-6 md:grid-cols-[190px_1fr] lg:gap-8 lg:grid-cols-[230px_1fr]">
             <aside className="self-start md:sticky md:top-24">
               <p className="mb-3 font-body text-[0.56rem] uppercase tracking-[0.2em] text-muted">
                 All designs
               </p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2.5">
                 {present.map((img) => (
                   <button
                     key={img.file}
@@ -526,7 +522,7 @@ export default function App() {
                       onError={() => markMissing(img.file)}
                       className="aspect-square w-full object-cover"
                     />
-                    <span className="absolute inset-x-0 bottom-0 bg-ink/70 py-0.5 text-center font-body text-[0.5rem] uppercase tracking-[0.12em] text-ivory">
+                    <span className="absolute inset-x-0 bottom-0 bg-ink/70 py-1 text-center font-body text-[0.58rem] uppercase tracking-[0.14em] text-ivory">
                       {img.code}
                     </span>
                   </button>
