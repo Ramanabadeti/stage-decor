@@ -9,7 +9,13 @@
     />
     <meta name="theme-color" content="#FDFBF7" />
 
+    <!-- The one address Google should index. Without this, a second
+         domain pointing here reads as a duplicate site and the two
+         split each other's ranking. -->
+    <link rel="canonical" href="https://advancedstagedecoration.com/" />
+
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://advancedstagedecoration.com/" />
     <meta
       property="og:title"
       content="StageDecor | Wedding &amp; Event Stage Decoration in Milwaukee, WI"
@@ -18,7 +24,11 @@
       property="og:description"
       content="Floral arches, draped backdrops and warm lighting, designed around your colours and built in your Milwaukee venue."
     />
-    <meta property="og:image" content="/dec1.jpg" />
+    <!-- Absolute, because Facebook and WhatsApp will not resolve a relative path -->
+    <meta
+      property="og:image"
+      content="https://advancedstagedecoration.com/dec1.jpg"
+    />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -40,8 +50,8 @@
         "name": "StageDecor",
         "description": "Stage and event decoration for weddings, engagements, birthdays and corporate events in Milwaukee, Wisconsin.",
         "telephone": "+1-414-617-1267",
-        "url": "https://stage-decor.vercel.app",
-        "image": "https://stage-decor.vercel.app/dec1.jpg",
+        "url": "https://advancedstagedecoration.com",
+        "image": "https://advancedstagedecoration.com/dec1.jpg",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Milwaukee",
