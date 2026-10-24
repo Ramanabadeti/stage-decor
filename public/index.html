@@ -32,10 +32,37 @@
       property="og:description"
       content="Floral arches, draped backdrops and warm lighting, designed around your colours and built in your Milwaukee venue."
     />
-    <!-- Absolute, because Facebook and WhatsApp will not resolve a relative path -->
+    <!-- Shared-link preview card: the logo on the site's ivory, drawn at
+         1200x630. Opaque on purpose — chat apps composite a transparent
+         PNG onto black, which would wreck the champagne-gold mark. JPEG
+         because some scrapers still will not read WebP.
+         Absolute, because Facebook and WhatsApp will not resolve a
+         relative path. -->
     <meta
       property="og:image"
-      content="https://www.advancedstagedecoration.com/dec1.jpg"
+      content="https://www.advancedstagedecoration.com/og-image.jpg"
+    />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Advanced Stage Decoration — wedding and event decoration, Milwaukee WI"
+    />
+    <meta property="og:site_name" content="Advanced Stage Decoration" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Advanced Stage Decoration | Weddings &amp; Events in Milwaukee, WI"
+    />
+    <meta
+      name="twitter:description"
+      content="Floral arches, draped backdrops and warm lighting, designed around your colours and built in your Milwaukee venue."
+    />
+    <meta
+      name="twitter:image"
+      content="https://www.advancedstagedecoration.com/og-image.jpg"
     />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
