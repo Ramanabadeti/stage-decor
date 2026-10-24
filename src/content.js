@@ -1,6 +1,6 @@
 // One place for the business details that appear across the site.
 export const business = {
-  name: "StageDecor",
+  name: "Advanced Stage Decoration",
   contactName: "Maumud Mubshar",
   city: "Milwaukee",
   region: "WI",

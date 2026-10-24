@@ -360,8 +360,10 @@ export default function App() {
       {/* ── HEADER ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 border-b border-gold/20 bg-ivory/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5">
-          <a href="#top" className="flex flex-col leading-none">
-            <span className="font-display text-xl font-medium tracking-wide text-ink sm:text-2xl">
+          <a href="#top" className="flex min-w-0 flex-col leading-none">
+            {/* The full name is long, so it steps down and is allowed to
+                wrap to two lines rather than crowding the nav. */}
+            <span className="font-display text-[1.05rem] font-medium leading-tight tracking-wide text-ink sm:text-xl lg:text-2xl">
               {business.name}
             </span>
             <span className="mt-1 hidden font-body text-[0.52rem] uppercase tracking-luxe text-gold sm:inline sm:text-[0.55rem]">
@@ -369,16 +371,16 @@ export default function App() {
             </span>
           </a>
 
-          <nav className="flex items-center gap-5">
+          <nav className="flex shrink-0 items-center gap-4 sm:gap-5">
             <a
               href="#gallery"
-              className="font-body text-[0.65rem] uppercase tracking-[0.18em] text-muted transition-colors hover:text-gold"
+              className="hidden font-body text-[0.65rem] uppercase tracking-[0.18em] text-muted transition-colors hover:text-gold sm:inline"
             >
               Gallery
             </a>
             <a
               href="#contact"
-              className="font-body text-[0.65rem] uppercase tracking-[0.18em] text-muted transition-colors hover:text-gold"
+              className="hidden font-body text-[0.65rem] uppercase tracking-[0.18em] text-muted transition-colors hover:text-gold sm:inline"
             >
               Contact
             </a>
@@ -656,7 +658,7 @@ export default function App() {
       >
         <a
           href={`https://wa.me/${business.whatsapp}?text=${encodeURIComponent(
-            "Hello StageDecor, I would like to enquire about stage decoration for my event."
+            "Hello Advanced Stage Decoration, I would like to enquire about stage decoration for my event."
           )}`}
           target="_blank"
           rel="noopener noreferrer"
