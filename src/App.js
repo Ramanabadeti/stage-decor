@@ -370,7 +370,7 @@ export default function App() {
                 src="/logo-horizontal.png"
                 alt={`${business.name} — wedding and event decoration`}
                 width="900"
-                height="178"
+                height="173"
                 className="h-9 w-auto max-w-full sm:h-11 lg:h-12"
               />
             </picture>
