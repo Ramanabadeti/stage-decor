@@ -360,15 +360,20 @@ export default function App() {
       {/* ── HEADER ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 border-b border-gold/20 bg-ivory/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5">
-          <a href="#top" className="flex min-w-0 flex-col leading-none">
-            {/* The full name is long, so it steps down and is allowed to
-                wrap to two lines rather than crowding the nav. */}
-            <span className="font-display text-[1.05rem] font-medium leading-tight tracking-wide text-ink sm:text-xl lg:text-2xl">
-              {business.name}
-            </span>
-            <span className="mt-1 hidden font-body text-[0.52rem] uppercase tracking-luxe text-gold sm:inline sm:text-[0.55rem]">
-              Wedding &amp; Event Decoration
-            </span>
+          {/* Brand logo: floral arch left, company name right.
+              The alt carries the name so it is still announced and
+              still readable by search engines. */}
+          <a href="#top" className="flex min-w-0 shrink items-center" aria-label={`${business.name} — home`}>
+            <picture>
+              <source srcSet="/logo-horizontal.webp" type="image/webp" />
+              <img
+                src="/logo-horizontal.png"
+                alt={`${business.name} — wedding and event decoration`}
+                width="900"
+                height="178"
+                className="h-9 w-auto max-w-full sm:h-11 lg:h-12"
+              />
+            </picture>
           </a>
 
           <nav className="flex shrink-0 items-center gap-4 sm:gap-5">
@@ -392,7 +397,21 @@ export default function App() {
       </header>
 
       {/* ── INTRO ──────────────────────────────────────────── */}
-      <section id="top" className="px-5 pb-10 pt-14 text-center sm:pt-20">
+      <section id="top" className="px-5 pb-10 pt-10 text-center sm:pt-14">
+        {/* Brand mark above the city line. Decorative here — the header
+            logo already announces the name, so this one is hidden from
+            screen readers rather than repeating it. */}
+        <picture>
+          <source srcSet="/logo-stacked.webp" type="image/webp" />
+          <img
+            src="/logo-stacked.png"
+            alt=""
+            aria-hidden="true"
+            width="1100"
+            height="821"
+            className="mx-auto mb-8 h-auto w-full max-w-[280px] sm:max-w-[360px] lg:max-w-[420px]"
+          />
+        </picture>
         <p className="eyebrow">{business.cityRegion}</p>
         <h1 className="mx-auto mt-4 max-w-3xl font-display text-4xl font-light leading-tight text-ink sm:text-5xl">
           Stage decoration for weddings,
